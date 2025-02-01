@@ -19,8 +19,8 @@ class DefaultSeeder extends Seeder
         // Create an Admin User linked to the Main Branch
         $user = User::create([
             'username' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('helloworld'),
+            'email' => 'admin@pharmapp.test',
+            'password' => bcrypt('Admin@321#'),
             'role' => 'admin',
             'branch_id' => $mainBranch->id,
         ]);

@@ -18,6 +18,7 @@ class Credit extends Model
         'amount_paid',
         'status',
         'balance',
+        'user_id',
     ];
 
     protected static function boot()
@@ -26,12 +27,18 @@ class Credit extends Model
 
         static::creating(function ($model) {
             $model->branch_id = Auth::user()->branch_id;
+            $model->user_id = Auth::user()->id;
         });
 
         // Global scope to automatically filter credits by the user's branch
         static::addGlobalScope('branch', function ($query) {
             $query->where('branch_id', Auth::user()->branch_id);
         });
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function sales()

@@ -16,7 +16,8 @@ class Sale extends Model
         'customer_id',
         'total_amount',
         'payment_status',
-        'branch_id'
+        'branch_id',
+        'user_id',
     ];
 
     protected static function boot()
@@ -26,6 +27,7 @@ class Sale extends Model
         static::creating(function ($model) {
             $model->branch_id = Auth::user()->branch_id;
             $model->order_number = Carbon::now()->format('mdHis');
+            $model->user_id = Auth::user()->id;
         });
 
         // Global scope to filter records based on the user's role
@@ -39,6 +41,11 @@ class Sale extends Model
         });
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    
     public function branch()
     {
         return $this->belongsTo(Branch::class);

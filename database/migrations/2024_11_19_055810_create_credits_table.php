@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('balance');
             $table->enum('status', ['paid', 'unpaid', 'partially_paid'])->default('unpaid');
             $table->foreignId('branch_id')->constrained()->CascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

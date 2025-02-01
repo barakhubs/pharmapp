@@ -7,6 +7,7 @@ use App\Filament\Resources\SaleResource\RelationManagers;
 use App\Models\Medicine;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
@@ -19,6 +20,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
+use Filament\Actions\StaticAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Illuminate\Support\Facades\Log;
 
 class SaleResource extends Resource
@@ -43,7 +47,27 @@ class SaleResource extends Resource
                     ->afterStateUpdated(function (Set $set) {
                         $set('total_cost', '0.00');
                     })
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->label('Customer Name')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('email')
+                            ->email(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Phone')
+                            ->prefix('+256')
+                            ->maxLength(9)
+                            ->placeholder('712345678')
+                            ->tel()
+                            ->required(),
+                        Forms\Components\Textarea::make('address')
+                            ->label('Address')
+                            ->rows('3')
+                            ->columnSpanFull()
+                            ->required(),
+                    ]),
 
                 Forms\Components\Repeater::make('orderItems')
                     ->schema([
@@ -147,15 +171,26 @@ class SaleResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->money('UGX ')
-                    ->searchable(),
+                    ->searchable()
+                    ->summarize(Sum::make()->money('UGX ')->label('Total')),
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options([
                         'paid' => 'Paid',
                         'unpaid' => 'Unpaid',
                         'pending' => 'Pending',
+                        'credit' => 'Credit',
                     ])
                     ->afterStateUpdated(function ($state, $record) {
-                        // Perform additional logic if needed
+                        if ($state === 'credit') {
+                            return Action::make('Enter Credit Details')
+                                ->form([
+                                    Forms\Components\TextInput::make('credit_limit')
+                                    ->numeric()
+                                    ->required()
+                                    ->label('Credit Limit'),
+                                ])
+                                ->modalCancelAction(fn(StaticAction $action) => $action->label('Close'));
+                        }
                         Notification::make()
                             ->success()
                             ->title('Status Updated')

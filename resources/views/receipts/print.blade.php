@@ -50,6 +50,7 @@
             font-size: 12px;
             margin-top: 20px;
         }
+
     </style>
     <script>
         window.onload = function() {
@@ -58,21 +59,31 @@
     </script>
 </head>
 <body>
+    @php
+        $setting = \App\Models\GeneralSetting::first();
+        $email = $setting->support_email;
+        $phone = $setting->support_phone;
+        $name = $setting->site_name;
+    @endphp
     <div class="header">
-        <h1>Fellowship Modern Pharmacy</h1>
+        <h1>{{ $name }}</h1>
         <p>Your Trusted Store</p>
         <p>Branch: {{ $sale->branch->name }}</p>
-        <p>Date: {{ now()->format('Y-m-d H:i:s') }}</p>
+        <p>Tel: {{ $phone }}</p>
+        @if ($email !== null)
+            <p>Email: {{ $email }}</p>
+        @endif
     </div>
 
     <div class="line"></div>
 
     <div class="details">
-        <p><strong>Order Number:</strong> {{ $sale->order_number }}</p>
+        <p><strong>Order Number:</strong> #{{ $sale->order_number }}</p>
         <p><strong>Customer:</strong> {{ $sale->customer->name }}</p>
         <p><strong>Email:</strong> {{ $sale->customer->email }}</p>
         <p><strong>Phone:</strong> +256 {{ $sale->customer->phone }}</p>
         <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
+        <p><strong>Date:</strong>: {{ now()->format('d-M-Y H:i:s') }}</p>
     </div>
 
     <div class="line"></div>
@@ -111,7 +122,7 @@
     <div class="line"></div>
 
     <div class="footer">
-        <p>Thank you for shopping with Fellowship Modern Pharmacy!</p>
+        <p>Thank you for shopping with {{ $name }}!</p>
         <p>Visit us again!</p>
     </div>
 </body>

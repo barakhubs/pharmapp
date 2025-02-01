@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\RawJs;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -35,14 +36,52 @@ class MedicineResource extends Resource
                     ->native(false)
                     ->relationship('stockCategory', 'name')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->label('Category Name')
+                            ->columnSpanFull(),
+                        Forms\Components\Textarea::make('description')
+                            ->label('Description')
+                            ->rows(5)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull(),
                 Forms\Components\Select::make('supplier_id')
                     ->label('Select Supplier')
                     ->required()
-                    ->searchable(['name','address', 'contact_person'])
+                    ->searchable(['name', 'address', 'contact_person'])
                     ->preload()
                     ->native(false)
-                    ->relationship('supplier', 'name'),
+                    ->relationship('supplier', 'name')
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label("Supplier Name")
+                            ->columnSpanFull()
+                            ->required(),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->nullable(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Phone')
+                            ->prefix('+256')
+                            ->maxLength(9)
+                            ->placeholder('712345678')
+                            ->tel()
+                            ->required(),
+                        Forms\Components\TextInput::make('contact_person')
+                            ->label('Contact Person')
+                            ->columnSpanFull()
+                            ->required(),
+                        Forms\Components\Textarea::make('address')
+                            ->label('Address')
+                            ->rows('5')
+                            ->columnSpanFull()
+                            ->required(),
+                    ])
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('name')
                     ->label('Medicine Name')
                     ->columnSpanFull()
@@ -59,9 +98,14 @@ class MedicineResource extends Resource
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
                     ->required(),
+                Forms\Components\TextInput::make('batch_no')
+                    ->label('Batch No.')
+                    ->unique()
+                    ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Expiry Date')
-                    ->columnSpanFull()
+                    ->native(false)
+                    ->minDate(now())
                     ->required(),
                 Forms\Components\Textarea::make('description')
                     ->label('Description')
@@ -76,6 +120,7 @@ class MedicineResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
+                    ->description(fn(Medicine $record) => 'Batch No.: '.$record->batch_no )
                     ->sortable(),
                 Tables\Columns\TextColumn::make('buying_price')
                     ->money('UGX ')
@@ -86,7 +131,7 @@ class MedicineResource extends Resource
                 Tables\Columns\TextColumn::make('stock_quantity')
                     ->label('Available Stock')
                     ->getStateUsing(function ($record) {
-                        if($record->stock_quantity == null || $record->stock_quantity <= 0) {
+                        if ($record->stock_quantity == null || $record->stock_quantity <= 0) {
                             return 'Out of Stock';
                         } else {
                             return $record->stock_quantity . ' Items';
@@ -111,7 +156,14 @@ class MedicineResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('categories')
+                    ->relationship('stockCategory', 'name')
+                    ->multiple()
+                    ->preload(),
+                SelectFilter::make('suppliers')
+                    ->relationship('supplier', 'name')
+                    ->multiple()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->slideOver()->modalWidth(MaxWidth::Medium),

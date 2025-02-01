@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->CascadeOnDelete();
             $table->integer('total_amount');
             $table->enum('payment_status', ['paid', 'unpaid', 'pending', 'credit'])->default('pending');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

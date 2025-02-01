@@ -15,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -27,6 +28,7 @@ class PurchaseResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static ?string $navigationGroup = 'Stock Management';
+    protected static ?string $heading = 'Custom Page Heading';
 
     public static function form(Form $form): Form
     {
@@ -47,6 +49,7 @@ class PurchaseResource extends Resource
                     ->columnSpanFull(),
 
                     Forms\Components\Repeater::make('purchaseItems')
+                    ->label('Stock items')
                     ->schema([
                         Forms\Components\Select::make('medicine_id')
                             ->label('Select Medicine')
@@ -66,8 +69,8 @@ class PurchaseResource extends Resource
                             ->afterStateUpdated(function ($state, Set $set, $get) {
                                 if ($state) {
                                     $medicine = Medicine::find($state);
-                                    $set('price', number_format($medicine->selling_price, 2));
-                                    $total = $medicine->selling_price * $get('quantity');
+                                    $set('price', number_format($medicine->buying_price, 2));
+                                    $total = $medicine->buying_price * $get('quantity');
                                     $set('total', number_format($total, 2));
                                 }
                             }),
@@ -91,8 +94,13 @@ class PurchaseResource extends Resource
                                     ->prefix('UGX ')
                                     ->mask(RawJs::make('$money($input)'))
                                     ->label('Unit Price')
-                                    ->disabled()
-                                    ->dehydrated(true), // Ensure inclusion in the data
+                                    ->dehydrated(true)
+                                    ->afterStateUpdated(function ($state, Set $set, $get) {
+                                        $price = floatval(str_replace(',', '', $get('price') ?? 0));
+                                        $quantity = floatval($state);
+                                        $total = $price * $quantity;
+                                        $set('total', number_format($total, 2));
+                                    }),
 
                             ])->columns(2),
 
@@ -103,6 +111,7 @@ class PurchaseResource extends Resource
                             ->disabled()
                             ->dehydrated(true), // Ensure inclusion in the data
                     ])
+                    ->addActionLabel('Add stock item')
                     ->collapsible()
                     ->collapsed(true)
                     ->cloneable()
@@ -145,7 +154,8 @@ class PurchaseResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_cost')
                     ->money('UGX ')
-                    ->searchable(),
+                    ->searchable()
+                    ->summarize(summarizers: Sum::make()->money('UGX ')->label('Total')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

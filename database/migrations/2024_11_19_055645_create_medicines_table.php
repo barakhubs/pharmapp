@@ -17,11 +17,14 @@ return new class extends Migration
             $table->foreignId('stock_category_id')->constrained()->onDelete('cascade');
             $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
             $table->foreignId('branch_id')->constrained()->CascadeOnDelete();
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('buying_price');
             $table->string('selling_price');
             $table->string('stock_quantity');
-            $table->string('expiry_date');
+            $table->string('expiry_date')->nullable();
+            $table->string('batch_no')->nullable();
+            $table->string('manufacture_date')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

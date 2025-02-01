@@ -19,9 +19,10 @@ class Medicine extends Model
         'quantity',
         'stock_category_id',
         'supplier_id',
-        'stock_quantity',
+        'batch_no',
         'expiry_date',
-        'branch_id'
+        'branch_id',
+        'user_id',
     ];
 
     protected static function boot()
@@ -30,6 +31,8 @@ class Medicine extends Model
 
         static::creating(function ($model) {
             $model->branch_id = Auth::user()->branch_id;
+            $model->user_id = Auth::user()->id;
+            $model->stock_quantity = 0;
         });
 
         // Global scope to filter records based on the user's role
@@ -41,6 +44,10 @@ class Medicine extends Model
                 $query->where('branch_id', $user->branch_id);
             }
         });
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function stockCategory()

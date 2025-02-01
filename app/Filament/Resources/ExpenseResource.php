@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\RawJs;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -43,6 +44,8 @@ class ExpenseResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->rows(4)
+                    ->maxLength(100)
+                    ->hint('Maximum of 100 characters')
                     ->columnSpanFull(),
             ]);
     }
@@ -57,7 +60,8 @@ class ExpenseResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->money('UGX ')
-                    ->searchable(),
+                    ->searchable()
+                    ->summarize(summarizers: Sum::make()->money('UGX ')->label('Total')),
                 Tables\Columns\TextColumn::make('date')
                     ->since()
                     ->dateTimeTooltip(),

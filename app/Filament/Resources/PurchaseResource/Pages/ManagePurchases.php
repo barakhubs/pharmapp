@@ -11,10 +11,19 @@ use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Helpers\Helper;
+use Carbon\Carbon;
+use Filament\Actions\Action;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Resources\Components\Tab;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Can;
 
 class ManagePurchases extends ManageRecords
 {
     protected static string $resource = PurchaseResource::class;
+    protected ?string $heading = 'Purchases';
+    protected ?string $subheading = 'Medicine Stocking';
 
     protected function getHeaderActions(): array
     {
@@ -47,7 +56,8 @@ class ManagePurchases extends ManageRecords
                             $medicine->update([
                                 'stock_quantity' => $medicine->stock_quantity + $item['quantity']
                             ]);
-                            $total_cost += ($item['quantity'] * $item['price']);
+
+                            $total_cost += ((float)$item['quantity'] * (float)$price);
                             $total_quantity += $item['quantity'];
                         }
 
@@ -61,6 +71,50 @@ class ManagePurchases extends ManageRecords
                         return $purchase;
                     });
                 }),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+
+        return [
+            'today' => Tab::make()
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereDate('created_at', today())
+                ),
+            'this_week' => Tab::make()
+                ->modifyQueryUsing(function (Builder $query) {
+                    return $query->whereDate('created_at', '>=', now()->startOfWeek(Carbon::MONDAY))
+                        ->whereDate('created_at', '<=', now()->endOfWeek(Carbon::SUNDAY));
+                }),
+            'last_week' => Tab::make()
+                ->modifyQueryUsing(function (Builder $query) {
+                    return $query->whereDate('created_at', '>=', now()->subWeek()->startOfWeek(Carbon::MONDAY))
+                        ->whereDate('created_at', '<=', now()->subWeek()->endOfWeek(Carbon::SUNDAY));
+                }),
+            'this_month' => Tab::make()
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                ),
+            'last_month' => Tab::make()
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereMonth('created_at', now()->subMonth()->month)
+                        ->whereYear('created_at', now()->subMonth()->year)
+                ),
+            'this_year' => Tab::make()
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereYear('created_at', now()->year)
+                ),
+            'last_year' => Tab::make()
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereYear('created_at', now()->subYear())
+                ),
         ];
     }
 }
