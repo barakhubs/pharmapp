@@ -73,10 +73,7 @@ class CreditResource extends Resource
                         fn($state, callable $set, callable $get) =>
                         $state > $get('balance') ? $set('amount_paid', $get('balance')) : null
                     ),
-                Forms\Components\TextInput::make('credit_id')
-                    ->readOnly()
-                    ->required()
-                    ->columns(1),
+                Forms\Components\Hidden::make('credit_id'),
             ]);
     }
 
