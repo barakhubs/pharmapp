@@ -181,7 +181,7 @@ class SaleResource extends Resource
                         'credit' => 'Credit',
                     ])
                     ->disabled(fn($record) => in_array($record->payment_status, ['paid', 'credit'])) // Disable for paid & credit
-                    ->afterStateUpdated(function ($state, $record) {
+                    ->afterStateUpdated(function ($state, $record, $livewire) {
                         Notification::make()
                             ->success()
                             ->title('Status Updated')
@@ -198,6 +198,7 @@ class SaleResource extends Resource
 
                             return redirect()->route('filament.app.resources.credits.index');
                         }
+
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

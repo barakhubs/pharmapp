@@ -64,10 +64,11 @@
         $email = $setting->support_email;
         $phone = $setting->support_phone;
         $name = $setting->site_name;
+        $tagline = $setting->site_description;
     @endphp
     <div class="header">
         <h1>{{ $name }}</h1>
-        <p>Your Trusted Store</p>
+        <p>{{ $tagline == null ? 'Health for all' : $tagline }}</p>
         <p>Branch: {{ $sale->branch->name }}</p>
         <p>Tel: {{ $phone }}</p>
         @if ($email !== null)
@@ -93,7 +94,7 @@
             <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
             @endif
         @endif
-        <p><strong>Date:</strong> {{ now()->format('d-M-Y H:i:s') }}</p>
+        <p><strong>Date:</strong> {{ $sale->created_at->format('d-M-Y H:i:s') }}</p>
         @if ($sale->user->username)
             <p><strong>Served by:</strong> {{ $sale->user->username }}</p>
         @endif
@@ -107,6 +108,7 @@
             <thead>
                 <tr>
                     <th>Item</th>
+                    <th>Batch & Expiry</th>
                     <th>Qty</th>
                     <th>Price (ugx)</th>
                     <th>Total (ugx)</th>
@@ -115,7 +117,16 @@
             <tbody>
                 @foreach ($saleItems as $item)
                     <tr>
-                        <td>{{ $item->medicine->name }}</td>
+                        <td>
+                            {{ \Str::limit($item->medicine->name, 15, '...') }}
+                        </td>
+                        <td>
+                            <small>
+                                ({{ $item->medicine->batch_no }})
+                                <br>
+                                {{ date('d-M-Y', strtotime($item->medicine->expiry_date)) }}
+                            </small>
+                        </td>
                         <td>{{ $item->quantity }}</td>
                         <td>{{ number_format($item->price, 2) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
