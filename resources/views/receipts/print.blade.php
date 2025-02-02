@@ -78,13 +78,25 @@
     <div class="line"></div>
 
     <div class="details">
-        <p><strong>Order Number:</strong> #{{ $sale->order_number }}</p>
-        <p><strong>Customer:</strong> {{ $sale->customer->name }}</p>
-        <p><strong>Email:</strong> {{ $sale->customer->email }}</p>
-        <p><strong>Phone:</strong> +256 {{ $sale->customer->phone }}</p>
-        <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
+        @if ($sale->order_number)
+            <p><strong>Order Number:</strong> #{{ $sale->order_number }}</p>
+        @endif
+        @if ($sale->customer)
+            <p><strong>Customer:</strong> {{ $sale->customer->name }}</p>
+            @if ($sale->customer->email)
+            <p><strong>Email:</strong> {{ $sale->customer->email }}</p>
+            @endif
+            @if ($sale->customer->phone)
+            <p><strong>Phone:</strong> +256 {{ $sale->customer->phone }}</p>
+            @endif
+            @if ($sale->customer->address)
+            <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
+            @endif
+        @endif
         <p><strong>Date:</strong>: {{ now()->format('d-M-Y H:i:s') }}</p>
-        <p><strong>Served by:</strong>: {{ auth()->user()->username }}</p>
+        @if ($sale->user->username)
+            <p><strong>Served by:</strong>: {{ $sale->user->username }}</p>
+        @endif
     </div>
 
     <div class="line"></div>
