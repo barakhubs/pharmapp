@@ -93,9 +93,9 @@
             <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
             @endif
         @endif
-        <p><strong>Date:</strong>: {{ now()->format('d-M-Y H:i:s') }}</p>
+        <p><strong>Date:</strong> {{ now()->format('d-M-Y H:i:s') }}</p>
         @if ($sale->user->username)
-            <p><strong>Served by:</strong>: {{ $sale->user->username }}</p>
+            <p><strong>Served by:</strong> {{ $sale->user->username }}</p>
         @endif
     </div>
 
