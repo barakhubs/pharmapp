@@ -95,6 +95,7 @@ class CreditResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
+                    ->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'partially_paid' => 'gray',
                         'paid' => 'success',
@@ -102,12 +103,9 @@ class CreditResource extends Resource
                         'unpaid' => 'danger',
                     })
                     ->searchable(),
-                Tables\Columns\TextColumn::make('branch.name')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->date()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -117,62 +115,6 @@ class CreditResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\Action::make('pay')
-                    ->label('Pay')
-                    ->icon('heroicon-o-currency-dollar')
-                    ->fillForm(fn(Credit $record): array => [
-                        'customer_name' => $record->customer->name,
-                        'balance' => $record->amount_owed,
-                        'order_number' => '#' . $record->order_number,
-                    ])
-                    ->form([
-                        Forms\Components\TextInput::make('customer_name')
-                            ->required()
-                            ->readOnly()
-                            ->label('Customer Name')
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('order_number')
-                            ->required()
-                            ->readOnly()
-                            ->label('Order No.')
-                            ->columns(1),
-                        Forms\Components\TextInput::make('balance')
-                            ->readOnly()
-                            ->mask(RawJs::make('$money($input)'))
-                            ->prefix('UGX')
-                            ->stripCharacters(',')
-                            ->required()
-                            ->columns(1),
-                        Forms\Components\TextInput::make('amount_paid')
-                            ->required()
-                            ->label('Amount Paid')
-                            ->mask(RawJs::make('$money($input)'))
-                            ->prefix('UGX')
-                            ->stripCharacters(','),
-                    ])
-                    ->action(
-                        function (array $data, $record) {
-                            $record->create([
-                                'customer_id' => $record->customer_id,
-                                'order_number' => $record->order_number,
-                                'amount_paid' => $data['amount_paid'],
-                                'amount_owed' => floatval($data['balance']) - floatval($data['amount_paid']),
-                                'status' => match (true) {
-                                    $record->balance == 0 => 'paid',
-                                    $record->amount_owed == $record->balance => 'unpaid',
-                                    $record->amount_owed > $record->balance => 'partially_paid',
-                                    default => 'unpaid'
-                                }
-                            ]);
-
-                            Notification::make()
-                                ->success()
-                                ->title('Credit payment added successfully')
-                                ->send();
-                        }
-                    )
-                    ->slideOver()
-                    ->modalWidth(MaxWidth::Medium),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
