@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('credits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers');
+            $table->string('order_number', 50);
             $table->decimal('amount_owed', 8, 2);
-            $table->decimal('amount_paid', 8, 2);
-            $table->date('balance');
+            $table->decimal('amount_paid', 8, 2)->default(0)->nullable();
+            $table->decimal('balance');
             $table->enum('status', ['paid', 'unpaid', 'partially_paid'])->default('unpaid');
             $table->foreignId('branch_id')->constrained()->CascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource\RelationManagers;
+use App\Models\Credit;
 use App\Models\Medicine;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -21,7 +22,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
-use Filament\Actions\StaticAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Illuminate\Support\Facades\Log;
 
@@ -180,22 +180,24 @@ class SaleResource extends Resource
                         'pending' => 'Pending',
                         'credit' => 'Credit',
                     ])
+                    ->disabled(fn($record) => in_array($record->payment_status, ['paid', 'credit'])) // Disable for paid & credit
                     ->afterStateUpdated(function ($state, $record) {
-                        if ($state === 'credit') {
-                            return Action::make('Enter Credit Details')
-                                ->form([
-                                    Forms\Components\TextInput::make('credit_limit')
-                                    ->numeric()
-                                    ->required()
-                                    ->label('Credit Limit'),
-                                ])
-                                ->modalCancelAction(fn(StaticAction $action) => $action->label('Close'));
-                        }
                         Notification::make()
                             ->success()
                             ->title('Status Updated')
                             ->body("The payment status has been updated to: {$state}")
                             ->send();
+
+                        if ($state === 'credit') {
+                            $credit = new Credit();
+                            $credit->customer_id = $record->customer_id;
+                            $credit->order_number = $record->order_number;
+                            $credit->amount_owed = $record->total_amount;
+                            $credit->balance = $credit->amount_owed;
+                            $credit->save();
+
+                            return redirect()->route('filament.app.resources.credits.index');
+                        }
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

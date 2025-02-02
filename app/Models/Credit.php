@@ -19,6 +19,7 @@ class Credit extends Model
         'status',
         'balance',
         'user_id',
+        'order_number'
     ];
 
     protected static function boot()
@@ -26,8 +27,8 @@ class Credit extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->branch_id = Auth::user()->branch_id;
-            $model->user_id = Auth::user()->id;
+            $model->branch_id = optional(Auth::user())->branch_id;
+            $model->user_id = optional(Auth::user())->id;
         });
 
         // Global scope to automatically filter credits by the user's branch
@@ -76,20 +77,8 @@ class Credit extends Model
         return $this->amount_owed - $this->amount_paid;
     }
 
-    // Update credit status based on payments
-    public function updateStatus()
+    public function branch()
     {
-        $balance = $this->calculateBalance();
-
-        if ($balance <= 0) {
-            $this->status = 'paid';
-        } elseif ($this->amount_paid > 0) {
-            $this->status = 'partial';
-        } else {
-            $this->status = 'unpaid';
-        }
-
-        $this->balance = $balance;
-        $this->save();
+        return $this->belongsTo(Branch::class);
     }
 }

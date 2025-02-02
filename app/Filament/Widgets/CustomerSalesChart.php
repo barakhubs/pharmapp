@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
@@ -23,16 +24,25 @@ class CustomerSalesChart extends ChartWidget
 
         // Fetch top 10 customers by sales within the specified date range
         $salesData = DB::table('sales')
-            ->select('customer_id', DB::raw('SUM(total_amount) as total_sales'))
-            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
-            ->groupBy('customer_id')
+            ->join('customers', 'sales.customer_id', '=', 'customers.id')
+            ->select(
+                'customers.name as customer_name',
+                DB::raw('SUM(total_amount) as total_sales')
+            )
+            ->whereBetween('sales.created_at', [$dateRange['start'], $dateRange['end']])
+            ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total_sales')
             ->limit(10)
             ->get();
 
+        // Then use customer names for labels
+        $labels = $salesData->pluck('customer_name')->toArray();
+
         // Format the data for the chart
         $labels = $salesData->pluck('customer_id')->toArray();
-        $data = $salesData->pluck('total_sales')->toArray();
+        $data = $salesData->pluck('total_sales')
+            ->map(fn($amount) => number_format($amount, 2))
+            ->toArray();
 
         return [
             'labels' => $labels,
@@ -40,6 +50,9 @@ class CustomerSalesChart extends ChartWidget
                 [
                     'label' => 'Sales',
                     'data' => $data,
+                    'backgroundColor' => '#4CAF50',  // Add some color
+                    'borderColor' => '#388E3C',
+                    'borderWidth' => 1,
                 ],
             ],
         ];
@@ -82,5 +95,36 @@ class CustomerSalesChart extends ChartWidget
     protected function getType(): string
     {
         return 'bar';
+    }
+
+    protected function getFilters(): ?array
+    {
+        return [
+            'this-week' => 'This Week',
+            'last-week' => 'Last Week',
+            'this-month' => 'This Month',
+            'last-month' => 'Last Month',
+            'this-year' => 'This Year',
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                ],
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'title' => [
+                        'display' => true,
+                        'text' => 'Sales Amount',
+                    ],
+                ],
+            ],
+        ];
     }
 }

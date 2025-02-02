@@ -84,6 +84,7 @@
         <p><strong>Phone:</strong> +256 {{ $sale->customer->phone }}</p>
         <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
         <p><strong>Date:</strong>: {{ now()->format('d-M-Y H:i:s') }}</p>
+        <p><strong>Served by:</strong>: {{ auth()->user()->username }}</p>
     </div>
 
     <div class="line"></div>
