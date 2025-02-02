@@ -66,8 +66,6 @@ class ManagePurchases extends ManageRecords
                             'total_cost' => $total_cost,
                         ]);
 
-
-
                         return $purchase;
                     });
                 }),

@@ -23,6 +23,11 @@ class Medicine extends Model
         'expiry_date',
         'branch_id',
         'user_id',
+        'stock_quantity'
+    ];
+
+    protected $attributes = [
+        'stock_quantity' => 0, 
     ];
 
     protected static function boot()
@@ -32,7 +37,10 @@ class Medicine extends Model
         static::creating(function ($model) {
             $model->branch_id = Auth::user()->branch_id;
             $model->user_id = Auth::user()->id;
-            $model->stock_quantity = 0;
+
+            if (is_null($model->stock_quantity)) {
+                $model->stock_quantity = 0;
+            }
         });
 
         // Global scope to filter records based on the user's role
