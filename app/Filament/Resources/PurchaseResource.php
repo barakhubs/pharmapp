@@ -71,7 +71,8 @@ class PurchaseResource extends Resource
                                     $medicine = Medicine::find($state);
                                     $set('price', number_format($medicine->buying_price, 2));
                                     $total = $medicine->buying_price * $get('quantity');
-                                    $set('total', number_format($total, 2));
+                                    $set('total', number_format($total, decimals: 2));
+                                    $set('measurement_unit', $medicine->measurement_unit);
                                 }
                             }),
 
@@ -88,7 +89,8 @@ class PurchaseResource extends Resource
                                         $quantity = floatval($state);
                                         $total = $price * $quantity;
                                         $set('total', number_format($total, 2));
-                                    }),
+                                    })
+                                    ->suffix(fn ($get) => $get('measurement_unit') ?? 'units'),
 
                                 Forms\Components\TextInput::make('price')
                                     ->prefix('UGX ')
@@ -101,7 +103,6 @@ class PurchaseResource extends Resource
                                         $total = $price * $quantity;
                                         $set('total', number_format($total, 2));
                                     }),
-
                             ])->columns(2),
 
                         Forms\Components\TextInput::make('total')

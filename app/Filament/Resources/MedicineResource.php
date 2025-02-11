@@ -98,9 +98,24 @@ class MedicineResource extends Resource
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
                     ->required(),
+                Forms\Components\Select::make('measurement_unit')
+                    ->label('Measurement Unit')
+                    ->options([
+                        'pkts' => 'Pkts',
+                        'vials' => 'Vials',
+                        'btl' => 'Btl',
+                        'pc' => 'Pc',
+                        'amp' => 'Amp',
+                        'supp' => 'Supp',
+                        'pess' => 'Pess',
+                        'dose' => 'Dose',
+                    ])
+                    ->native(false)
+                    ->searchable()
+                    ->preload()
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('batch_no')
                     ->label('Batch No.')
-                    ->unique()
                     ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Expiry Date')
@@ -121,7 +136,10 @@ class MedicineResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->description(fn(Medicine $record) => 'Batch No.: '.$record->batch_no )
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(function ($record) {
+                        return \Str::ucfirst($record->name);
+                        }),
                 Tables\Columns\TextColumn::make('buying_price')
                     ->money('UGX ')
                     ->searchable(),
@@ -134,7 +152,7 @@ class MedicineResource extends Resource
                         if ($record->stock_quantity == null || $record->stock_quantity <= 0) {
                             return 'Out of Stock';
                         } else {
-                            return $record->stock_quantity . ' Items';
+                            return $record->stock_quantity . ' ' . $record->measurement_unit;
                         }
                     }),
                 Tables\Columns\TextColumn::make('stockCategory.name')

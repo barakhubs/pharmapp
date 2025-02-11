@@ -23,11 +23,12 @@ class Medicine extends Model
         'expiry_date',
         'branch_id',
         'user_id',
-        'stock_quantity'
+        'stock_quantity',
+        'measurement_unit'
     ];
 
     protected $attributes = [
-        'stock_quantity' => 0, 
+        'stock_quantity' => 0,
     ];
 
     protected static function boot()
