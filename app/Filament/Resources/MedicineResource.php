@@ -111,6 +111,7 @@ class MedicineResource extends Resource
                         'supp' => 'Supp',
                         'pess' => 'Pess',
                         'dose' => 'Dose',
+                        'tube' => 'Tube',
                     ])
                     ->native(false)
                     ->searchable()
