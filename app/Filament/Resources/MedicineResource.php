@@ -8,6 +8,7 @@ use App\Models\Medicine;
 use App\Models\PurchaseItem;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\RawJs;
@@ -16,6 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Unique;
 
 class MedicineResource extends Resource
 {
@@ -115,7 +117,7 @@ class MedicineResource extends Resource
                     ->preload()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('batch_no')
-                    ->label('Batch No.')
+                    ->unique(Medicine::class, column: 'batch_no', ignoreRecord: true)
                     ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Expiry Date')
