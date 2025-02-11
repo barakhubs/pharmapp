@@ -44,6 +44,9 @@ class StockCategoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Category Name')
+                    ->getStateUsing(function ($record) {
+                        return \Str::title($record->name);
+                        })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

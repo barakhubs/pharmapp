@@ -141,7 +141,7 @@ class MedicineResource extends Resource
                     ->description(fn(Medicine $record) => 'Batch No.: '.$record->batch_no )
                     ->sortable()
                     ->getStateUsing(function ($record) {
-                        return \Str::ucfirst($record->name);
+                        return \Str::title($record->name);
                         }),
                 Tables\Columns\TextColumn::make('buying_price')
                     ->money('UGX ')
@@ -160,6 +160,9 @@ class MedicineResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('stockCategory.name')
                     ->label('Category')
+                    ->getStateUsing(function ($record) {
+                        return \Str::title($record->stockCategory->name);
+                        })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label('Supplier')
