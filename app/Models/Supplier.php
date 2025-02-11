@@ -48,4 +48,9 @@ class Supplier extends Model
     {
         return $this->hasMany(Medicine::class);
     }
+
+    public function getNameAttribute($value)
+    {
+        return \Str::title($value);
+    }
 }

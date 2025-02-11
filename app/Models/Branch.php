@@ -27,4 +27,9 @@ class Branch extends Model
         return $this->hasMany(Sale::class);
     }
 
+    public function getNameAttribute($value)
+    {
+        return \Str::title($value);
+    }
+
 }

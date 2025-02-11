@@ -6,6 +6,8 @@ use App\Filament\Resources\MedicineResource\Pages;
 use App\Filament\Resources\MedicineResource\RelationManagers;
 use App\Models\Medicine;
 use App\Models\PurchaseItem;
+use App\Models\StockCategory;
+use App\Models\Supplier;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -36,7 +38,11 @@ class MedicineResource extends Resource
                     ->label('Select Stock Category')
                     ->required()
                     ->native(false)
-                    ->relationship('stockCategory', 'name')
+                    ->options(function () {
+                        return StockCategory::all()->pluck('name', 'id')->mapWithKeys(function ($name, $id) {
+                            return [$id => \Str::ucfirst($name)];
+                        });
+                    })
                     ->searchable()
                     ->preload()
                     ->createOptionForm([
@@ -56,7 +62,11 @@ class MedicineResource extends Resource
                     ->searchable(['name', 'address', 'contact_person'])
                     ->preload()
                     ->native(false)
-                    ->relationship('supplier', 'name')
+                    ->options(function () {
+                        return Supplier::all()->pluck('name', 'id')->mapWithKeys(function ($name, $id) {
+                            return [$id => \Str::ucfirst($name)];
+                        });
+                    })
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->label("Supplier Name")
@@ -138,11 +148,11 @@ class MedicineResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->description(fn(Medicine $record) => 'Batch No.: '.$record->batch_no )
+                    ->description(fn(Medicine $record) => 'Batch No.: ' . $record->batch_no)
                     ->sortable()
                     ->getStateUsing(function ($record) {
                         return \Str::title($record->name);
-                        }),
+                    }),
                 Tables\Columns\TextColumn::make('buying_price')
                     ->money('UGX ')
                     ->searchable(),
@@ -162,7 +172,7 @@ class MedicineResource extends Resource
                     ->label('Category')
                     ->getStateUsing(function ($record) {
                         return \Str::title($record->stockCategory->name);
-                        })
+                    })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label('Supplier')
