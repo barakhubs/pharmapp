@@ -219,7 +219,7 @@ class SaleResource extends Resource
                     Tables\Actions\Action::make('print_receipt')
                         ->label('Receipt')
                         ->icon('heroicon-m-receipt-percent')
-                        ->url(fn($record) => route('receipt.print', $record->id))
+                        ->url(fn($record) => route('receipts.print', $record->id))
                         ->openUrlInNewTab(),
                     Tables\Actions\Action::make('print_invoice')
                         ->label('Invoice')
