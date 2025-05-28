@@ -231,6 +231,11 @@ class SaleResource extends Resource
                 ->icon('heroicon-m-printer')
                 ->color('success')
                 ->button(),
+                // Tables\Actions\EditAction::make()
+                // ->disabled(fn($record) => !in_array($record->payment_status, ['pending', 'unpaid']))
+                // ->tooltip('Only pending or unpaid sales can be edited')
+                // ->slideOver(),
+
                 Tables\Actions\DeleteAction::make()
                     ->modalDescription('This action cannot be undone. All related sale items will also be deleted.')
                     ->before(function ($record) {

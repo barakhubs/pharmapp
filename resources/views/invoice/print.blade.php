@@ -70,17 +70,16 @@
             text-decoration: underline;
         }
 
+        .invoice-number {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+            color: #333;
+        }
+
         .file-copy {
             font-style: italic;
             font-size: 12px;
-        }
-
-        .invoice-info {
-            margin-bottom: 15px;
-        }
-
-        .invoice-info div {
-            margin: 5px 0;
         }
 
         .customer-info {
@@ -248,15 +247,14 @@
             </div>
 
             <div class="invoice-title-section">
-                <div class="invoice-title">SALES INVOICE</div>
+                <div>
+                    <div class="invoice-title">SALES INVOICE</div>
+                    <div class="invoice-number">INVOICE #: {{ $sale->order_number }}</div>
+                </div>
                 <div>
                     <div class="file-copy">CUSTOMER COPY</div>
-                    <div style="text-align: right; margin-top: 5px;">{{ $sale->id }}-{{ $sale->created_at->format('n') }}-{{ $sale->created_at->format('j') }}</div>
+                    <div style="text-align: right; margin-top: 5px;">Date: {{ $sale->created_at->format('d-M-Y') }}</div>
                 </div>
-            </div>
-
-            <div class="invoice-info">
-                <div><strong>Date:</strong> {{ $sale->created_at->format('d-M-y') }}</div>
             </div>
 
             <div class="customer-info">
@@ -356,15 +354,14 @@
             </div>
 
             <div class="invoice-title-section">
-                <div class="invoice-title">SALES INVOICE</div>
+                <div>
+                    <div class="invoice-title">SALES INVOICE</div>
+                    <div class="invoice-number">INVOICE #: {{ $sale->order_number }}</div>
+                </div>
                 <div>
                     <div class="file-copy">FILE COPY</div>
-                    <div style="text-align: right; margin-top: 5px;">{{ $sale->id }}-{{ $sale->created_at->format('n') }}-{{ $sale->created_at->format('j') }}</div>
+                    <div style="text-align: right; margin-top: 5px;">Date: {{ $sale->created_at->format('d-M-Y') }}</div>
                 </div>
-            </div>
-
-            <div class="invoice-info">
-                <div><strong>Date:</strong> {{ $sale->created_at->format('d-M-y') }}</div>
             </div>
 
             <div class="customer-info">
