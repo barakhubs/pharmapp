@@ -222,9 +222,9 @@ class SaleResource extends Resource
                         ->url(fn($record) => route('receipts.print', $record->id))
                         ->openUrlInNewTab(),
                     Tables\Actions\Action::make('print_invoice')
-                        ->label('Invoice')
+                        ->label(label: 'Invoice')
                         ->icon('heroicon-m-document-text')
-                        ->url(fn($record) => route('invoice.print', $record->id))
+                        ->url(url: fn($record) => route('invoice.print', $record->id))
                         ->openUrlInNewTab(),
                 ])
                 ->label('Print')
