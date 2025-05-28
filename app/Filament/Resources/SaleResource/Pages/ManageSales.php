@@ -68,7 +68,9 @@ class ManageSales extends ManageRecords
 
                         return $sale;
                     });
-                }),
+                })
+                // ->after(fn (Model $record) => route('receipt.print', ['id' => $record->id]))
+                // ->openUrlInNewTab(),
         ];
     }
 

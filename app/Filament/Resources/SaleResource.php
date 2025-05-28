@@ -99,9 +99,9 @@ class SaleResource extends Resource
                                 Forms\Components\TextInput::make('quantity')
                                     ->required()
                                     ->numeric()
-                                    ->minValue(1)
+                                    ->step(0.25)
+                                    ->minValue(0.25)
                                     ->maxValue(function ($get) {
-                                        // Fetch the stock quantity for the current medicine (e.g., medicine is an instance of the Medicine model)
                                         $medicine = $get('medicine'); // Adjust based on how you retrieve the medicine data
                                         return $medicine ? $medicine->stock_quantity : 0; // Fallback to 0 if no stock found
                                     })
@@ -180,6 +180,7 @@ class SaleResource extends Resource
                         'pending' => 'Pending',
                         'credit' => 'Credit',
                     ])
+                    ->sortable()
                     ->disabled(fn($record) => in_array($record->payment_status, ['paid', 'credit'])) // Disable for paid & credit
                     ->afterStateUpdated(function ($state, $record, $livewire) {
                         Notification::make()
@@ -209,14 +210,27 @@ class SaleResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\Action::make('Print Receipt')
-                    ->icon('heroicon-m-printer')
-                    ->url(fn($record) => route('receipt.print', $record->id))
-                    ->openUrlInNewTab(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('print_receipt')
+                        ->label('Receipt')
+                        ->icon('heroicon-m-receipt-percent')
+                        ->url(fn($record) => route('receipt.print', $record->id))
+                        ->openUrlInNewTab(),
+                    Tables\Actions\Action::make('print_invoice')
+                        ->label('Invoice')
+                        ->icon('heroicon-m-document-text')
+                        ->url(fn($record) => route('invoice.print', $record->id))
+                        ->openUrlInNewTab(),
+                ])
+                ->label('Print')
+                ->icon('heroicon-m-printer')
+                ->color('success')
+                ->button(),
                 Tables\Actions\DeleteAction::make()
                     ->modalDescription('This action cannot be undone. All related sale items will also be deleted.')
                     ->before(function ($record) {

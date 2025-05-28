@@ -68,9 +68,4 @@ class Medicine extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
-
-    public function getNameAttribute($value)
-    {
-        return \Str::title($value);
-    }
 }

@@ -21,6 +21,13 @@ Route::get('/receipt/{id}/print', function ($id) {
     $saleItems = \App\Models\SaleItem::where('sale_id', $id)->get();
 
     return view('receipts.print', compact('sale', 'saleItems'));
-})->name('receipt.print');
+})->name('receipts.print');
+
+Route::get('/invoice/{id}/print', function ($id) {
+    $sale = \App\Models\Sale::with('customer')->findOrFail($id);
+    $saleItems = \App\Models\SaleItem::where('sale_id', $id)->get();
+
+    return view('invoice.print', compact('sale', 'saleItems'));
+})->name('invoice.print');
 
 Route::redirect('/laravel/login', '/login')->name('login');

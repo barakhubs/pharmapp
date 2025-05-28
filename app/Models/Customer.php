@@ -40,9 +40,4 @@ class Customer extends Model
     {
         return $this->hasMany(Credit::class);
     }
-
-    public function getNameAttribute($value)
-    {
-        return \Str::title($value);
-    }
 }

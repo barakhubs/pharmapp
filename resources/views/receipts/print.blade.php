@@ -3,58 +3,146 @@
 <head>
     <title>Receipt</title>
     <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            line-height: 1.4;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 24px;
+        @page {
+            size: 80mm auto;
             margin: 0;
         }
-        .header p {
+
+        body {
+            font-family: 'Courier New', 'Liberation Mono', monospace;
             font-size: 14px;
-            margin: 5px 0;
-        }
-        .line {
-            border-top: 1px dashed #000;
-            margin: 10px 0;
-        }
-        .details p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .items table {
-            width: 100%;
-            font-size: 14px;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-        .items table th,
-        .items table td {
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 20px;
+            line-height: 1.1;
+            width: 80mm;
+            margin: 0;
+            padding: 5mm;
+            color: #000;
+            background: #fff;
+            font-weight: bold;
         }
 
+        .center {
+            text-align: center;
+        }
+
+        .left {
+            text-align: left;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            margin: 2px 0;
+        }
+
+        .line {
+            border-top: 1px solid #000;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        .double-line {
+            border-top: 2px solid #000;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        .dashed-line {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+            font-size: 12px;
+        }
+
+        .row .label {
+            font-weight: bold;
+        }
+
+        .items-header {
+            font-size: 11px;
+            font-weight: bold;
+            margin: 5px 0 2px 0;
+        }
+
+        .item {
+            margin: 3px 0;
+            font-size: 11px;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 1px;
+        }
+
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+
+        .item-meta {
+            font-size: 9px;
+            color: #333;
+            margin: 1px 0;
+        }
+
+        .total-section {
+            margin-top: 8px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 3px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+
+        .small-text {
+            font-size: 10px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        /* Ensure crisp printing */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
     </style>
     <script>
         window.onload = function() {
-            window.print();
+            setTimeout(function() {
+                window.print();
+            }, 200);
         };
     </script>
 </head>
@@ -66,88 +154,85 @@
         $name = $setting->site_name;
         $tagline = $setting->site_description;
     @endphp
+
     <div class="header">
-        <h1>{{ $name }}</h1>
-        <p>{{ $tagline == null ? 'Health for all' : $tagline }}</p>
-        <p>Branch: {{ $sale->branch->name }}</p>
-        <p>Tel: {{ $phone }}</p>
-        @if ($email !== null)
-            <p>Email: {{ $email }}</p>
+        <div class="title">{{ $name }}</div>
+        <div class="subtitle">{{ $tagline ?? 'Health for all' }}</div>
+        <div class="subtitle">{{ $sale->branch->name }}</div>
+        <div class="subtitle">Tel: {{ $phone }}</div>
+        @if ($email)
+            <div class="subtitle">{{ $email }}</div>
         @endif
     </div>
 
-    <div class="line"></div>
+    <div class="double-line"></div>
 
-    <div class="details">
-        @if ($sale->order_number)
-            <p><strong>Order Number:</strong> #{{ $sale->order_number }}</p>
+    @if ($sale->order_number)
+        <div class="row">
+            <span class="label">Order #:</span>
+            <span>#{{ $sale->order_number }}</span>
+        </div>
+    @endif
+
+    @if ($sale->customer)
+        <div class="row">
+            <span class="label">Customer:</span>
+            <span>{{ $sale->customer->name }}</span>
+        </div>
+        @if ($sale->customer->phone)
+            <div class="row">
+                <span class="label">Phone:</span>
+                <span>+256 {{ $sale->customer->phone }}</span>
+            </div>
         @endif
-        @if ($sale->customer)
-            <p><strong>Customer:</strong> {{ $sale->customer->name }}</p>
-            @if ($sale->customer->email)
-            <p><strong>Email:</strong> {{ $sale->customer->email }}</p>
-            @endif
-            @if ($sale->customer->phone)
-            <p><strong>Phone:</strong> +256 {{ $sale->customer->phone }}</p>
-            @endif
-            @if ($sale->customer->address)
-            <p><strong>Address:</strong> {{ $sale->customer->address }}</p>
-            @endif
-        @endif
-        <p><strong>Date:</strong> {{ $sale->created_at->format('d-M-Y H:i:s') }}</p>
-        @if ($sale->user->username)
-            <p><strong>Served by:</strong> {{ $sale->user->username }}</p>
-        @endif
+    @endif
+
+    <div class="row">
+        <span class="label">Date:</span>
+        <span>{{ $sale->created_at->format('d-M-Y H:i') }}</span>
     </div>
 
-    <div class="line"></div>
+    @if ($sale->user->username)
+        <div class="row">
+            <span class="label">Cashier:</span>
+            <span>{{ $sale->user->username }}</span>
+        </div>
+    @endif
 
-    <div class="items">
-        <h3>Items</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Batch & Expiry</th>
-                    <th>Qty</th>
-                    <th>Price (ugx)</th>
-                    <th>Total (ugx)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($saleItems as $item)
-                    <tr>
-                        <td>
-                            {{ \Str::limit($item->medicine->name, 15, '...') }}
-                        </td>
-                        <td>
-                            <small>
-                                ({{ $item->medicine->batch_no }})
-                                <br>
-                                {{ date('d-M-Y', strtotime($item->medicine->expiry_date)) }}
-                            </small>
-                        </td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->price, 2) }}</td>
-                        <td>{{ number_format($item->total, 2) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="dashed-line"></div>
+
+    <div class="items-header">ITEMS</div>
+
+    @foreach ($saleItems as $item)
+        <div class="item">
+            <div class="item-name">{{ \Str::limit($item->medicine->name, 25, '...') }}</div>
+            <div class="item-meta">Batch: {{ $item->medicine->batch_no }}</div>
+            <div class="item-meta">Exp: {{ date('d-M-Y', strtotime($item->medicine->expiry_date)) }}</div>
+            <div class="item-details">
+                <span>{{ $item->quantity }}x {{ number_format($item->price, 0) }}</span>
+                <span class="bold">{{ number_format($item->total, 0) }}</span>
+            </div>
+        </div>
+        <div class="dashed-line"></div>
+    @endforeach
+
+    <div class="total-section">
+        <div class="total-row">
+            <span>TOTAL:</span>
+            <span>UGX {{ number_format($sale->total_amount, 0) }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Payment:</span>
+            <span>{{ ucfirst($sale->payment_status) }}</span>
+        </div>
     </div>
 
-    <div class="line"></div>
-
-    <div class="details">
-        <p><strong>Total Amount:</strong> UGX {{ number_format($sale->total_amount, 2) }}</p>
-        <p><strong>Payment Status:</strong> {{ ucfirst($sale->payment_status) }}</p>
-    </div>
-
-    <div class="line"></div>
+    <div class="double-line"></div>
 
     <div class="footer">
-        <p>Thank you for shopping with {{ $name }}!</p>
-        <p>Visit us again!</p>
+        <div class="bold">Thank you for shopping with us!</div>
+        <div class="small-text">Visit us again!</div>
+        <div class="small-text">{{ now()->format('d-M-Y H:i:s') }}</div>
     </div>
 </body>
 </html>
