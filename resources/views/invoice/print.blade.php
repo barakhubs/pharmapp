@@ -304,7 +304,7 @@
                     <span>Invoice Total:</span>
                     <span>{{ number_format($subtotal, 0) }}</span>
                 </div>
-                <div class="total-row">
+                {{-- <div class="total-row">
                     <span>Bal B/d:</span>
                     <span>{{ number_format($balanceBroughtForward, 0) }}</span>
                 </div>
@@ -315,7 +315,7 @@
                 <div class="total-row balance">
                     <span>Bal C/f:</span>
                     <span>{{ number_format($balanceCarriedForward, 0) }}</span>
-                </div>
+                </div> --}}
             </div>
 
             <div class="amount-words">
@@ -329,14 +329,13 @@
             </div>
 
             <div class="signature-section">
-                <div style="margin-bottom: 15px;"><strong>Customer's Sign</strong></div>
-                <div style="border-bottom: 1px solid #000; width: 150px; margin-bottom: 20px;"></div>
-
                 <div class="signature-row">
                     <div>
                         <div><strong>Served By:</strong> {{ $sale->user->username ?? 'N/A' }}</div>
                         <div class="footer-info">{{ $name }} v1.0</div>
                     </div>
+                    <div style="margin-bottom: 15px;"><strong>Signature: </strong></div>
+                    <div style="border-bottom: 1px solid #000; width: 150px; margin-bottom: 20px;"></div>
                     <div style="text-align: right;">
                         <div><strong>Entered on:</strong> {{ $sale->created_at->format('n/j/Y g:i:s A') }}</div>
                         <div><strong>Printed on:</strong> {{ now()->format('n/j/Y g:i:s A') }}</div>
@@ -411,7 +410,7 @@
                     <span>Invoice Total:</span>
                     <span>{{ number_format($subtotal, 0) }}</span>
                 </div>
-                <div class="total-row">
+                {{-- <div class="total-row">
                     <span>Bal B/d:</span>
                     <span>{{ number_format($balanceBroughtForward, 0) }}</span>
                 </div>
@@ -422,7 +421,7 @@
                 <div class="total-row balance">
                     <span>Bal C/f:</span>
                     <span>{{ number_format($balanceCarriedForward, 0) }}</span>
-                </div>
+                </div> --}}
             </div>
 
             <div class="amount-words">
@@ -436,14 +435,14 @@
             </div>
 
             <div class="signature-section">
-                <div style="margin-bottom: 15px;"><strong>Customer's Sign</strong></div>
-                <div style="border-bottom: 1px solid #000; width: 150px; margin-bottom: 20px;"></div>
 
                 <div class="signature-row">
                     <div>
                         <div><strong>Served By:</strong> {{ $sale->user->username ?? 'N/A' }}</div>
                         <div class="footer-info">{{ $name }} v1.0</div>
                     </div>
+                    <div style="margin-bottom: 15px;"><strong>Signature: </strong></div>
+                    <div style="border-bottom: 1px solid #000; width: 150px; margin-bottom: 20px;"></div>
                     <div style="text-align: right;">
                         <div><strong>Entered on:</strong> {{ $sale->created_at->format('n/j/Y g:i:s A') }}</div>
                         <div><strong>Printed on:</strong> {{ now()->format('n/j/Y g:i:s A') }}</div>
