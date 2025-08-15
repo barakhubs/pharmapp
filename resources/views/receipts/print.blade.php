@@ -209,7 +209,7 @@
             <div class="item-meta">Batch: {{ $item->medicine->batch_no }}</div>
             <div class="item-meta">Exp: {{ date('d-M-Y', strtotime($item->medicine->expiry_date)) }}</div>
             <div class="item-details">
-                <span>{{ $item->quantity }}x {{ number_format($item->price, 0) }}</span>
+                <span>{{ $item->quantity }} {{ $item->medicine->measurement_unit }} x {{ number_format($item->price, 0) }}</span>
                 <span class="bold">{{ number_format($item->total, 0) }}</span>
             </div>
         </div>

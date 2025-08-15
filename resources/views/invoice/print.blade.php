@@ -286,7 +286,7 @@
                             <div>{{ date('n/j/Y', strtotime($item->medicine->expiry_date)) }}</div>
                             <div class="batch-info">- {{ $item->medicine->batch_no }}</div>
                         </td>
-                        <td class="unit-col">Pkt</td>
+                        <td class="unit-col">{{ $item->medicine->measurement_unit }}</td>
                         <td class="rate-col">{{ number_format($item->price, 0) }}</td>
                         <td class="qty-col">{{ $item->quantity }}</td>
                         <td class="total-col">{{ number_format($item->total, 0) }}</td>
@@ -392,7 +392,7 @@
                             <div>{{ date('n/j/Y', strtotime($item->medicine->expiry_date)) }}</div>
                             <div class="batch-info">- {{ $item->medicine->batch_no }}</div>
                         </td>
-                        <td class="unit-col">Pkt</td>
+                        <td class="unit-col">{{ $item->medicine->measurement_unit }}</td>
                         <td class="rate-col">{{ number_format($item->price, 0) }}</td>
                         <td class="qty-col">{{ $item->quantity }}</td>
                         <td class="total-col">{{ number_format($item->total, 0) }}</td>

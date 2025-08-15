@@ -86,8 +86,19 @@ class SaleResource extends Resource
                                     $total = $medicine->selling_price * $get('quantity');
                                     $set('total', number_format($total, 2));
                                     $set('medicine', $medicine);
+                                    $set('medicine_name', $medicine->name);
                                 }
                             }),
+
+                        Forms\Components\TextInput::make('medicine_name')
+                            ->label('Medicine Name')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn($get) => $get('medicine_id') !== null)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Hidden::make('medicine')
+                            ->dehydrated(false),
 
                         Grid::make()
                             ->schema([
@@ -97,8 +108,12 @@ class SaleResource extends Resource
                                     ->step(0.25)
                                     ->minValue(0.25)
                                     ->maxValue(function ($get) {
-                                        $medicine = $get('medicine'); // Adjust based on how you retrieve the medicine data
-                                        return $medicine ? $medicine->stock_quantity : 0; // Fallback to 0 if no stock found
+                                        $medicineId = $get('medicine_id');
+                                        if ($medicineId) {
+                                            $medicine = Medicine::find($medicineId);
+                                            return $medicine ? $medicine->stock_quantity : 0;
+                                        }
+                                        return 0;
                                     })
                                     ->default(1)
                                     ->live()
@@ -113,7 +128,6 @@ class SaleResource extends Resource
                                     ->prefix('UGX ')
                                     ->mask(RawJs::make('$money($input)'))
                                     ->label('Unit Price')
-                                    ->disabled()
                                     ->dehydrated(true), // Ensure inclusion in the data
 
                             ])->columns(2),
@@ -126,7 +140,7 @@ class SaleResource extends Resource
                             ->dehydrated(true), // Ensure inclusion in the data
                     ])
                     ->collapsible()
-                    ->collapsed(true)
+                    ->collapsed(fn($operation) => $operation === 'create')
                     ->cloneable()
                     ->columnSpan(2)
                     ->live(onBlur: true)

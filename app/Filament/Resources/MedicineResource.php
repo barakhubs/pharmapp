@@ -19,6 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
 class MedicineResource extends Resource
@@ -40,7 +41,7 @@ class MedicineResource extends Resource
                     ->native(false)
                     ->options(function () {
                         return StockCategory::all()->pluck('name', 'id')->mapWithKeys(function ($name, $id) {
-                            return [$id => \Str::ucfirst($name)];
+                            return [$id => Str::ucfirst($name)];
                         });
                     })
                     ->searchable()
@@ -64,7 +65,7 @@ class MedicineResource extends Resource
                     ->native(false)
                     ->options(function () {
                         return Supplier::all()->pluck('name', 'id')->mapWithKeys(function ($name, $id) {
-                            return [$id => \Str::ucfirst($name)];
+                            return [$id => Str::ucfirst($name)];
                         });
                     })
                     ->createOptionForm([
@@ -129,7 +130,13 @@ class MedicineResource extends Resource
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('batch_no')
                     ->unique(Medicine::class, column: 'batch_no', ignoreRecord: true)
-                    ->required(),
+                    ->required()
+                    ->visibleOn('create'),
+                Forms\Components\TextInput::make('batch_no')
+                    ->label('Batch No (Read Only)')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->visibleOn('edit'),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Expiry Date')
                     ->native(false)
@@ -151,7 +158,7 @@ class MedicineResource extends Resource
                     ->description(fn(Medicine $record) => 'Batch No.: ' . $record->batch_no)
                     ->sortable()
                     ->getStateUsing(function ($record) {
-                        return \Str::title($record->name);
+                        return Str::title($record->name);
                     }),
                 Tables\Columns\TextColumn::make('buying_price')
                     ->money('UGX ')
@@ -171,7 +178,7 @@ class MedicineResource extends Resource
                 Tables\Columns\TextColumn::make('stockCategory.name')
                     ->label('Category')
                     ->getStateUsing(function ($record) {
-                        return \Str::title($record->stockCategory->name);
+                        return Str::title($record->stockCategory->name);
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('supplier.name')

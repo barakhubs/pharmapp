@@ -42,7 +42,7 @@ class CreditResource extends Resource
                     ->native(false)
                     ->reactive()
                     ->afterStateUpdated(
-                        function($state, callable $set) {
+                        function ($state, callable $set) {
                             $credit = Credit::where('customer_id', $state)
                                 ->latest()
                                 ->first();
@@ -80,6 +80,29 @@ class CreditResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->groups([
+                Tables\Grouping\Group::make('customer.name')
+                    ->label('Customer')
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(function ($record) {
+                        $customerName = $record->customer->name;
+                        $customerId = $record->customer_id;
+
+                        // Get all credits for this customer
+                        $customerCredits = \App\Models\Credit::where('customer_id', $customerId)->get();
+
+                        $totalOwed = $customerCredits->sum(fn($r) => $r->amount_owed + $r->amount_paid);
+                        $totalPaid = $customerCredits->sum('amount_paid');
+                        $totalBalance = $customerCredits->sum('balance');
+                        $recordCount = $customerCredits->count();
+
+                        return "{$customerName} ({$recordCount} credits) - Total Owed: UGX " . number_format($totalOwed) .
+                            " | Paid: UGX " . number_format($totalPaid) .
+                            " | Balance: UGX " . number_format($totalBalance);
+                    }),
+            ])
+            ->defaultGroup('customer.name')
             ->columns([
                 Tables\Columns\TextColumn::make('customer.name')
                     ->sortable(),
@@ -96,7 +119,7 @@ class CreditResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'partially_paid' => 'gray',
                         'paid' => 'success',
                         'pending' => 'warning',
