@@ -8,29 +8,24 @@ use App\Models\Credit;
 use App\Models\Medicine;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
-use Filament\Forms\Components\Grid;
-use Filament\Notifications\Notification;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Actions\Action;
-use Filament\Tables\Columns\Summarizers\Sum;
-use Illuminate\Support\Facades\Log;
 
 class SaleResource extends Resource
 {
     protected static ?string $model = Sale::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationGroup = 'Sales Management';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -199,7 +194,6 @@ class SaleResource extends Resource
 
                             return redirect()->route('filament.app.resources.credits.index');
                         }
-
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -227,14 +221,14 @@ class SaleResource extends Resource
                         ->url(url: fn($record) => route('invoice.print', $record->id))
                         ->openUrlInNewTab(),
                 ])
-                ->label('Print')
-                ->icon('heroicon-m-printer')
-                ->color('success')
-                ->button(),
-                // Tables\Actions\EditAction::make()
+                    ->label('Print')
+                    ->icon('heroicon-m-printer')
+                    ->color('success')
+                    ->button(),
+                Tables\Actions\EditAction::make(),
                 // ->disabled(fn($record) => !in_array($record->payment_status, ['pending', 'unpaid']))
                 // ->tooltip('Only pending or unpaid sales can be edited')
-                // ->slideOver(),
+                // ->slideOver(),#
 
                 Tables\Actions\DeleteAction::make()
                     ->modalDescription('This action cannot be undone. All related sale items will also be deleted.')
@@ -255,10 +249,19 @@ class SaleResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSales::route('/'),
+            'index' => Pages\ListSales::route('/'),
+            'create' => Pages\CreateSale::route('/create'),
+            'edit' => Pages\EditSale::route('/{record}/edit'),
         ];
     }
 }

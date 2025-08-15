@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Str;
 
 class StockCategoryResource extends Resource
 {
@@ -45,7 +46,7 @@ class StockCategoryResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Category Name')
                     ->getStateUsing(function ($record) {
-                        return \Str::title($record->name);
+                        return \Illuminate\Support\Str::title($record->name);
                         })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
