@@ -133,8 +133,7 @@ class MedicineResource extends Resource
                     ->required()
                     ->visibleOn('create'),
                 Forms\Components\TextInput::make('batch_no')
-                    ->label('Batch No (Read Only)')
-                    ->disabled()
+                    ->label('Batch No')
                     ->dehydrated(false)
                     ->visibleOn('edit'),
                 Forms\Components\DatePicker::make('expiry_date')

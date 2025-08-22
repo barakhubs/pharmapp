@@ -43,12 +43,22 @@ class CreditResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(
                         function ($state, callable $set) {
-                            $credit = Credit::where('customer_id', $state)
-                                ->latest()
-                                ->first();
+                            if ($state) {
+                                // Get all credits for this customer with remaining balance
+                                $customerCredits = Credit::where('customer_id', $state)
+                                    ->where('balance', '>', 0)
+                                    ->get();
 
-                            $set('balance', $credit?->balance ?? 0);
-                            $set('credit_id', $credit?->id ?? null);
+                                $totalBalance = $customerCredits->sum('balance');
+                                $set('balance', $totalBalance);
+
+                                // Store all credit IDs for payment processing
+                                $creditIds = $customerCredits->pluck('id')->toArray();
+                                $set('credit_ids', json_encode($creditIds));
+                            } else {
+                                $set('balance', 0);
+                                $set('credit_ids', null);
+                            }
                         }
                     ),
 
@@ -73,7 +83,7 @@ class CreditResource extends Resource
                         fn($state, callable $set, callable $get) =>
                         $state > $get('balance') ? $set('amount_paid', $get('balance')) : null
                     ),
-                Forms\Components\Hidden::make('credit_id'),
+                Forms\Components\Hidden::make('credit_ids'),
             ]);
     }
 
@@ -92,7 +102,7 @@ class CreditResource extends Resource
                         // Get all credits for this customer
                         $customerCredits = \App\Models\Credit::where('customer_id', $customerId)->get();
 
-                        $totalOwed = $customerCredits->sum(fn($r) => $r->amount_owed + $r->amount_paid);
+                        $totalOwed = $customerCredits->sum('amount_owed');
                         $totalPaid = $customerCredits->sum('amount_paid');
                         $totalBalance = $customerCredits->sum('balance');
                         $recordCount = $customerCredits->count();

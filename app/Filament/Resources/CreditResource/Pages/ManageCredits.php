@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\CreditResource\Pages;
 
 use App\Filament\Resources\CreditResource;
@@ -20,33 +21,63 @@ class ManageCredits extends ManageRecords
                 ->slideOver()
                 ->modalWidth(MaxWidth::Medium)
                 ->mutateFormDataUsing(function (array $data): array {
-                    $credit = Credit::query()->latest()->find($data['credit_id']);
-                    $data['order_number'] = $credit->order_number;
-                    $data['amount_owed'] = floatval($data['balance']) - floatval($data['amount_paid']);
-                    $data['status'] = match (true) {
-                        $data['balance'] == 0 => 'paid',
-                        $data['amount_owed'] == $credit->balance => 'unpaid',
-                        $data['amount_owed'] < $credit->balance => 'partially_paid',
-                        default => 'unpaid',
-                    };
-                    $data['balance'] = $data['amount_owed'];
+                    // Get all credit IDs from the form
+                    $creditIds = json_decode($data['credit_ids'] ?? '[]', true);
+
+                    if (empty($creditIds)) {
+                        throw new \Exception('No credits found for this customer');
+                    }
+
+                    // Get all credits for this customer with remaining balance
+                    $customerCredits = Credit::whereIn('id', $creditIds)
+                        ->where('balance', '>', 0)
+                        ->orderBy('created_at', 'asc') // Pay oldest first
+                        ->get();
+
+                    $totalBalance = $customerCredits->sum('balance');
+                    $amountToPay = floatval($data['amount_paid']);
+                    $remainingPayment = $amountToPay;
+
+                    // Distribute payment across credits (oldest first)
+                    foreach ($customerCredits as $credit) {
+                        if ($remainingPayment <= 0) break;
+
+                        $creditBalance = $credit->balance;
+                        $paymentForThisCredit = min($creditBalance, $remainingPayment);
+
+                        // Calculate new amounts for this credit
+                        $newAmountPaid = $credit->amount_paid + $paymentForThisCredit;
+                        $newBalance = $credit->amount_owed - $newAmountPaid;
+                        $newStatus = $newBalance <= 0 ? 'paid' : 'partially_paid';
+
+                        // Update this credit
+                        $credit->update([
+                            'amount_paid' => $newAmountPaid,
+                            'balance' => max(0, $newBalance),
+                            'status' => $newStatus
+                        ]);
+
+                        // Update sale payment status if credit is fully paid
+                        if ($newStatus === 'paid') {
+                            Sale::where('order_number', $credit->order_number)
+                                ->update(['payment_status' => 'paid']);
+                        }
+
+                        $remainingPayment -= $paymentForThisCredit;
+                    }
+
+                    // Return data for the new payment record
+                    $data['order_number'] = 'PAYMENT-' . time();
+                    $data['amount_owed'] = $amountToPay;
+                    $data['amount_paid'] = $amountToPay;
+                    $data['balance'] = 0;
+                    $data['status'] = 'paid';
+
                     return $data;
                 })
                 ->after(function (array $data) {
-                    // Retrieve the last entered credit record with the same order_number
-                    $latestCredit = Credit::where('order_number', $data['order_number'])
-                        ->latest() // Get the most recent record
-                        ->first(); // Get only the first (latest) record
-
-                    // If the credit record exists and the difference between amount_paid and amount_owed is 0
-                    if ($latestCredit && floatval($data['amount_owed']) == 0) {
-                        // Update the Sale record where the order_number matches
-                        Sale::where('order_number', $data['order_number'])
-                            ->update(['payment_status' => 'paid']);
-
-                        // Update the latest Credit record's status to 'paid'
-                        $latestCredit->update(['status' => 'paid']);
-                    }
+                    // Payment processing is now handled in mutateFormDataUsing
+                    // This creates a payment record for tracking purposes
                 })
         ];
     }
