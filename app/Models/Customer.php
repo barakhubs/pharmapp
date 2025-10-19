@@ -36,8 +36,13 @@ class Customer extends Model
             }
         });
     }
-    public function credits ()
+    public function credits()
     {
         return $this->hasMany(Credit::class);
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
     }
 }

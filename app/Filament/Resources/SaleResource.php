@@ -245,7 +245,24 @@ class SaleResource extends Resource
                 // ->slideOver(),#
 
                 Tables\Actions\DeleteAction::make()
-                    ->modalDescription('This action cannot be undone. All related sale items will also be deleted.')
+                    ->modalDescription(function ($record) {
+                        $saleItemsCount = SaleItem::where('sale_id', $record->id)->count();
+
+                        if ($saleItemsCount > 0) {
+                            return "⚠️ WARNING: This sale has {$saleItemsCount} sale item(s) that will be permanently deleted.\n\nThis action cannot be undone. All related sale items will be permanently deleted.";
+                        }
+
+                        return 'Are you sure you want to delete this sale? This action cannot be undone.';
+                    })
+                    ->modalHeading(function ($record) {
+                        $saleItemsCount = SaleItem::where('sale_id', $record->id)->count();
+
+                        if ($saleItemsCount > 0) {
+                            return 'Delete Sale and Related Items?';
+                        }
+
+                        return 'Delete Sale?';
+                    })
                     ->before(function ($record) {
                         SaleItem::where('sale_id', $record->id)->delete();
                     })
@@ -258,7 +275,14 @@ class SaleResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->modalDescription('⚠️ WARNING: This will permanently delete all selected sales and their related sale items. This action cannot be undone.')
+                        ->modalHeading('Delete Sales and Related Items?')
+                        ->before(function ($records) {
+                            foreach ($records as $record) {
+                                SaleItem::where('sale_id', $record->id)->delete();
+                            }
+                        }),
                 ]),
             ]);
     }
