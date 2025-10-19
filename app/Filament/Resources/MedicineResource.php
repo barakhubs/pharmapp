@@ -129,13 +129,9 @@ class MedicineResource extends Resource
                     ->preload()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('batch_no')
-                    ->unique(Medicine::class, column: 'batch_no', ignoreRecord: true)
-                    ->required()
-                    ->visibleOn('create'),
-                Forms\Components\TextInput::make('batch_no')
                     ->label('Batch No')
-                    ->dehydrated(false)
-                    ->visibleOn('edit'),
+                    ->unique(Medicine::class, column: 'batch_no', ignoreRecord: true)
+                    ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Expiry Date')
                     ->native(false)
