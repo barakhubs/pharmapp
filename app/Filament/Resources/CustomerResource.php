@@ -83,7 +83,7 @@ class CustomerResource extends Resource
                     ->modalDescription(function ($record) {
                         $salesCount = Sale::where('customer_id', $record->id)->count();
                         $creditsCount = Credit::where('customer_id', $record->id)->count();
-                        
+
                         // Count sale items
                         $saleItemsCount = 0;
                         if ($salesCount > 0) {
@@ -111,7 +111,7 @@ class CustomerResource extends Resource
                     ->modalHeading(function ($record) {
                         $salesCount = Sale::where('customer_id', $record->id)->count();
                         $creditsCount = Credit::where('customer_id', $record->id)->count();
-                        
+
                         // Count sale items
                         $saleItemsCount = 0;
                         if ($salesCount > 0) {
@@ -127,18 +127,18 @@ class CustomerResource extends Resource
                     })
                     ->before(function ($record) {
                         // Delete related records in correct order to avoid foreign key constraint violations
-                        
+
                         // First, get all sales for this customer
                         $sales = Sale::where('customer_id', $record->id)->get();
-                        
+
                         // Delete sale items first (they reference sales)
                         foreach ($sales as $sale) {
                             SaleItem::where('sale_id', $sale->id)->delete();
                         }
-                        
+
                         // Then delete sales (they reference customer)
                         Sale::where('customer_id', $record->id)->delete();
-                        
+
                         // Finally delete credits (they reference customer)
                         Credit::where('customer_id', $record->id)->delete();
                     }),
@@ -151,18 +151,18 @@ class CustomerResource extends Resource
                         ->before(function ($records) {
                             foreach ($records as $record) {
                                 // Delete related records in correct order to avoid foreign key constraint violations
-                                
+
                                 // First, get all sales for this customer
                                 $sales = Sale::where('customer_id', $record->id)->get();
-                                
+
                                 // Delete sale items first (they reference sales)
                                 foreach ($sales as $sale) {
                                     SaleItem::where('sale_id', $sale->id)->delete();
                                 }
-                                
+
                                 // Then delete sales (they reference customer)
                                 Sale::where('customer_id', $record->id)->delete();
-                                
+
                                 // Finally delete credits (they reference customer)
                                 Credit::where('customer_id', $record->id)->delete();
                             }
