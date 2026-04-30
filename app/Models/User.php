@@ -58,7 +58,13 @@ class User extends Authenticatable implements FilamentUser, HasName, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; // Adjust this based on your requirements
+        // Allow all users in local development
+        if (app()->environment('local')) {
+            return true;
+        }
+
+        // Restrict by production domain
+        return str_ends_with($this->email, '@gmail.com');
     }
 
     public function branch()
